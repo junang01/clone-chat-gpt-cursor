@@ -1,103 +1,100 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useChat } from "@ai-sdk/react";
+import { Button } from "@/components/ui/button";
+
+const USER_AVATAR = "https://randomuser.me/api/portraits/men/32.jpg";
+const AI_AVATAR = "https://randomuser.me/api/portraits/lego/1.jpg";
+const USER_NAME = "You";
+const AI_NAME = "AI Bot";
+
+export default function Page() {
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    status,
+    error,
+    reload,
+    setMessages,
+  } = useChat({});
+
+  const handleReset = () => setMessages([]);
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-pink-50 flex items-center justify-center py-6">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-lg flex flex-col h-[90vh]">
+        {/* Header */}
+        <div className="flex items-center gap-3 px-6 py-4 border-b">
+          <img src={AI_AVATAR} alt="AI Avatar" className="w-10 h-10 rounded-full border" />
+          <div className="flex flex-col">
+            <span className="font-semibold text-lg">{AI_NAME}</span>
+            <span className="text-xs text-green-500">Online Now</span>
+          </div>
+          <div className="flex-1" />
+          <Button variant="outline" size="sm" onClick={handleReset} className="text-xs">대화 초기화</Button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+
+        {/* Chat messages */}
+        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-3">
+          {messages.length === 0 && (
+            <div className="text-gray-400 text-center mt-10">메시지를 입력해 대화를 시작하세요.</div>
+          )}
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+            >
+              {message.role !== "user" && (
+                <img src={AI_AVATAR} alt="AI" className="w-8 h-8 rounded-full mr-2 self-end" />
+              )}
+              <div
+                className={`rounded-2xl px-4 py-2 max-w-[70%] text-sm shadow-sm
+                  ${message.role === "user"
+                    ? "bg-pink-100 text-gray-800 rounded-br-none"
+                    : "bg-gray-100 text-gray-700 rounded-bl-none"}
+                `}
+              >
+                {message.content}
+              </div>
+              {message.role === "user" && (
+                <span className="ml-2 self-end text-xs text-pink-500 font-bold">나</span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Status & Error */}
+        {status === "streaming" && (
+          <div className="px-6 pb-1 text-xs text-blue-500">AI가 답변 중입니다...</div>
+        )}
+        {error && (
+          <div className="px-6 pb-1 text-xs text-red-500">
+            에러가 발생했습니다. <button onClick={() => reload()} className="underline">다시 시도</button>
+          </div>
+        )}
+
+        {/* Input */}
+        <form onSubmit={handleSubmit} className="flex items-center gap-2 px-4 py-4 border-t bg-white rounded-b-3xl">
+          <input
+            name="prompt"
+            value={input}
+            onChange={handleInputChange}
+            disabled={status !== "ready"}
+            className="flex-1 border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-200 bg-gray-50"
+            placeholder="Type your message..."
+            autoComplete="off"
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <Button
+            type="submit"
+            disabled={status !== "ready" || input.trim() === ""}
+            className="rounded-full px-5 py-2 bg-pink-500 hover:bg-pink-600 text-white font-semibold text-sm shadow disabled:opacity-50"
+          >
+            전송
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }
