@@ -23,7 +23,7 @@ Chat GPT와 유사한 채팅 AI Application 구현하는 것입니다.
 2. App Router 및 API Router 핸들러 구현
    Next.js의 App Router 기능을 사용하여 라우팅 구조를 설정한다.
    /api/chat 등 API 엔드포인트를 생성한다.
-   API 핸들러에서 ai-sdk를 이용해 사용자의 메시지를 AI로 전달하고, AI의 응답을 받아 반환하는 로직을 작성한다.
+   API 핸들러에서 ai-dk를 이용해 사용자의 메시지를 AI로 전달하고, AI의 응답을 받아 반환하는 로직을 작성한다.
    에러 처리 및 예외 상황(예: API 키 누락, AI 응답 실패 등)에 대한 핸들링을 구현한다.
 
 3. 프론트엔드와 API 연동

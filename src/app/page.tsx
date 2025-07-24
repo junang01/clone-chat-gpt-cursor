@@ -8,6 +8,12 @@ const AI_AVATAR = "https://randomuser.me/api/portraits/lego/1.jpg";
 const USER_NAME = "You";
 const AI_NAME = "AI Bot";
 
+// 특수기호 제거 함수
+function sanitize(text: string) {
+  // 필요에 따라 제거할 특수문자 추가 가능
+  return text.replace(/[\*\_\~\`\#\>\[\]\(\)\{\}\<\>\|\^\$\%\@\!\=\+\:\;\"\'\\/]/g, "");
+}
+
 export default function Page() {
   const {
     messages,
@@ -56,7 +62,9 @@ export default function Page() {
                     : "bg-gray-100 text-gray-700 rounded-bl-none"}
                 `}
               >
-                {message.content}
+                {message.role === "user"
+                  ? message.content
+                  : sanitize(message.content)}
               </div>
               {message.role === "user" && (
                 <span className="ml-2 self-end text-xs text-pink-500 font-bold">나</span>
