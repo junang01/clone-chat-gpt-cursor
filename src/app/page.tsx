@@ -17,14 +17,6 @@ function sanitize(text: string) {
 const STORAGE_KEY = "chatbot_messages";
 
 export default function Page() {
-  const saved = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
-  const initialMessages = saved ? (() => {
-    try {
-      const parsed = JSON.parse(saved);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch { return []; }
-  })() : [];
-
   const {
     messages,
     input,
@@ -34,7 +26,7 @@ export default function Page() {
     error,
     reload,
     setMessages,
-  } = useChat({ initialMessages });
+  } = useChat({}); // initialMessages 제거
 
   // 대화 내용 로컬스토리지에 저장
   useEffect(() => {
@@ -44,6 +36,19 @@ export default function Page() {
       localStorage.removeItem(STORAGE_KEY);
     }
   }, [messages]);
+
+  // 클라이언트에서만 대화 불러오기
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) setMessages(parsed);
+      } catch {}
+    }
+    // eslint-disable-next-line
+  }, []);
 
   const handleReset = () => setMessages([]);
 
