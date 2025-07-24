@@ -2,6 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
 
 const USER_AVATAR = "https://randomuser.me/api/portraits/men/32.jpg";
 const AI_AVATAR = "https://randomuser.me/api/portraits/lego/1.jpg";
@@ -10,9 +11,10 @@ const AI_NAME = "AI Bot";
 
 // 특수기호 제거 함수
 function sanitize(text: string) {
-  // 필요에 따라 제거할 특수문자 추가 가능
   return text.replace(/[\*\_\~\`\#\>\[\]\(\)\{\}\<\>\|\^\$\%\@\!\=\+\:\;\"\'\\/]/g, "");
 }
+
+const STORAGE_KEY = "chatbot_messages";
 
 export default function Page() {
   const {
@@ -25,6 +27,27 @@ export default function Page() {
     reload,
     setMessages,
   } = useChat({});
+
+  // 대화 내용 로컬스토리지에 저장
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }, [messages]);
+
+  // 첫 렌더 시 로컬스토리지에서 대화 불러오기
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) setMessages(parsed);
+      } catch {}
+    }
+    // eslint-disable-next-line
+  }, []);
 
   const handleReset = () => setMessages([]);
 
